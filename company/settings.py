@@ -82,11 +82,10 @@ WSGI_APPLICATION = 'company.wsgi.application'
 import dj_database_url
 import os
 
+DATABASE_URL = "postgresql://postgres:aftoFbSuRDhbdWJMCqGVXBafKGaMuPfM@viaduct.proxy.rlwy.net:50054/railway"
+
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL', 'postgresql://my_django_db_n16w_user:z7ZiElB8ioTIopHKTgzqeUJiEdYJMNbN@dpg-cum4s90gph6c73dbb4ig-a.oregon-postgres.render.com/my_django_db_n16w'),
-        engine='django.db.backends.postgresql'
-    )
+    'default': dj_database_url.config(default=DATABASE_URL)
 }
 
 
