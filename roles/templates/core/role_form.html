@@ -24,16 +24,30 @@
         }
         .form-control {
             border-radius: 5px;
+            height: 45px;
         }
         .btn-container {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
+            gap: 15px;
+        }
+        /* Styling for Django Messages */
+        .alert {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Django Messages -->
+        {% for message in messages %}
+            <div class="alert alert-info text-center">{{ message }}</div>
+        {% endfor %}
+        
         <h2>Create Role</h2>
+        
         <form method="post">
             {% csrf_token %}
             {% for field in form %}
@@ -47,6 +61,7 @@
                     {% endif %}
                 </div>
             {% endfor %}
+            
             <div class="btn-container">
                 <button type="submit" class="btn btn-primary">Submit</button>
                 <a href="{% url 'role_list' %}" class="btn btn-secondary">Cancel</a>
