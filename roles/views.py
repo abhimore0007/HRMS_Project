@@ -56,7 +56,7 @@ def assign_role(request):
             return redirect('role_list')
     else:
         form = UserRoleForm()
-    return render(request, 'core/assign_role.html', {'form': form})
+    return render(request, 'core/Assign_role.html', {'form': form})
 
 @login_required
 def user_dashboard(request):
