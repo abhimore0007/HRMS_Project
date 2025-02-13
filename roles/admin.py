@@ -7,7 +7,13 @@ class RoleAdmin(admin.ModelAdmin):
     list_filter = ('status',)
     search_fields = ('role_name',)
 
-@admin.register(UserRole)
+
 class UserRoleAdmin(admin.ModelAdmin):
-    list_display = ('user', 'role')
-    filter_horizontal = ('permissions',)
+    list_display = ("user", "get_role")  # Use a custom method for 'role'
+
+    def get_role(self, obj):
+        return obj.role.role_name  # Display role name instead of object reference
+    get_role.short_description = "Role"  # Set column name in Django Admin
+
+admin.site.register(UserRole, UserRoleAdmin)
+

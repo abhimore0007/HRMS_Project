@@ -18,11 +18,6 @@ class UserRoleForm(forms.ModelForm):
         label="Select User",
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-    role = forms.ModelChoiceField(
-        queryset=Role.objects.all(),
-        label="Select Role",
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
     permissions = forms.ModelMultipleChoiceField(
         queryset=Permission.objects.all(),
         required=False,
@@ -31,5 +26,5 @@ class UserRoleForm(forms.ModelForm):
 
     class Meta:
         model = UserRole
-        fields = ['user', 'role', 'permissions']
+        fields = ['user', 'permissions']
 

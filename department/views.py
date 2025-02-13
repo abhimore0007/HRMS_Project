@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from roles.models import Role, UserRole
+from employe.models import Employee
 
 
 
@@ -85,6 +86,16 @@ def department_dashboard(request):
         return redirect('index')
     departments = Department.objects.filter(status=True)
     return render(request, 'core/dashboard.html', {'departments': departments})
+
+def department_details(request, dept_id):
+    department = get_object_or_404(Department, dept_id=dept_id)
+    roles = Role.objects.filter(department=department, status=True)  # ✅ Fetch roles for this department
+
+    return render(request, 'core/department_detail.html', {
+        'department': department,
+        'roles': roles,  # ✅ Pass roles to the template
+    })
+
 
 # Create Department
 def add_department(request):
