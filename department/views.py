@@ -2,86 +2,76 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import Department
 from .forms import DepartmentForm
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User 
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from roles.models import Role, UserRole
-from employe.models import Employee
-
+from employe.models import Employe_User 
+from django.urls import reverse
 
 
 def index(request):
     return render(request, 'core/index.html')
 
-def register(request):
-    if request.method == "POST":
-        username = request.POST['username']
-        email = request.POST['email']
-        password = request.POST['password']
-        confirm_password = request.POST['confirm_password']
-
-        if password == confirm_password:
-            if User.objects.filter(username=username).exists():
-                messages.error(request, "Username already exists!")
-            elif User.objects.filter(email=email).exists():
-                messages.error(request, "Email already registered!")
-            else:
-                user = User.objects.create_user(username=username, email=email, password=password)
-                user.save()
-                messages.success(request, "Registration successful! You can now login.")
-                return redirect('login')
-        else:
-            messages.error(request, "Passwords do not match!")
-
-    return render(request, 'core/register.html')
 
 def user_login(request):
     if request.method == "POST":
-        username = request.POST['username']
-        password = request.POST['password']
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
         user = authenticate(request, username=username, password=password)
 
-        if user is not None:
-            login(request, user)
-            messages.success(request, "Login successful!")
+        if user is None:
+            try:
+                user = Employe_User.objects.get(username=username)
+                if not user.check_password(password):  # Manually check password
+                    raise Employe_User.DoesNotExist
+            except Employe_User.DoesNotExist:
+                messages.error(request, "Invalid username or password!")
+                return redirect("login")
 
-            # Check if user is an admin
-            if user.is_staff:
-                return redirect('department_dashboard')
+            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
 
-            # Check if user has a role assigned
-            user_role = UserRole.objects.filter(user=user).first()
-            if user_role:
-                return redirect('user_dashboard')
-            else:
-                messages.warning(request, "No role assigned. Please contact the admin.")
-                return redirect('no_role_page')  # Redirects to no_role.html
-
+        if user.is_superuser:
+            return redirect("department_dashboard")
         else:
-            messages.error(request, "Invalid username or password!")
+            return redirect("/user_dashboard/")
 
-    return render(request, 'core/login.html')
+    return render(request, "core/login.html")
 
 def user_logout(request):
     logout(request)
     return redirect('index')
 
-@login_required
+# @login_required
 def user_dashboard(request):
-    # Check if the user has an assigned role
-    user_role = UserRole.objects.filter(user=request.user).first()
+    department_id = request.GET.get('department')
+    role_id = request.GET.get('role')
+    manager_id = request.GET.get('manager')
 
-    if not user_role:
-        # If no role is assigned, render a page informing the user
-        return render(request, 'core/no_role.html', {'message': "No role assigned. Please contact the admin."})
+    users = Employe_User.objects.all()
+    
+    if department_id:
+        users = users.filter(dept_id=department_id)
+    if role_id:
+        users = users.filter(role_id=role_id)
+    if manager_id:
+        users = users.filter(reporting_manager_id=manager_id)
 
-    # Fetch user permissions if a role exists
-    user_permissions = user_role.permissions.all()
-    return render(request, 'core/user_dashboard.html', {'user_role': user_role, 'user_permissions': user_permissions})
+    departments = Department.objects.all()
+    roles = Role.objects.all()
+    managers = Employe_User.objects.filter(role__role_name="Manager")
+
+    return render(request, 'core/user_dashboard.html', {
+        'users': users,
+        'departments': departments,
+        'roles': roles,
+        'managers': managers
+    })
 
 # Dashboard View
 def department_dashboard(request):
-    if not request.user.is_staff:
+    if request.user.is_staff:
         messages.error(request, "Access denied!")
         return redirect('index')
     departments = Department.objects.filter(status=True)
@@ -89,11 +79,11 @@ def department_dashboard(request):
 
 def department_details(request, dept_id):
     department = get_object_or_404(Department, dept_id=dept_id)
-    roles = Role.objects.filter(department=department, status=True)  # ✅ Fetch roles for this department
+    roles = Role.objects.filter(department=department, status=True)
 
     return render(request, 'core/department_detail.html', {
         'department': department,
-        'roles': roles,  # ✅ Pass roles to the template
+        'roles': roles,
     })
 
 
@@ -101,12 +91,12 @@ def department_details(request, dept_id):
 def add_department(request):
     if not request.user.is_staff:
         messages.error(request, "Access denied!")
-        return redirect('index')  # Redirect if the user is not staff
+        return redirect('index')
 
     if request.method == "POST":
         form = DepartmentForm(request.POST)
         if form.is_valid():
-            form.save()  # Directly save the department without checking existence
+            form.save()
             messages.success(request, "Department added successfully!")
             return redirect('department_dashboard')
     else:
@@ -127,7 +117,6 @@ def update_department(request, dept_id):
             form.save()
             messages.success(request, "Department updated successfully!")
             return redirect('department_dashboard')
-
     else:
         form = DepartmentForm(instance=department)
 
@@ -142,13 +131,12 @@ def delete_department(request, dept_id):
     department = get_object_or_404(Department, dept_id=dept_id)
 
     if request.method == "POST":
-        department.status = False  # Soft delete
+        department.status = False
         department.save()
         messages.success(request, "Department deactivated successfully!")
         return redirect('department_dashboard')
 
     return render(request, 'core/confirm_delete.html', {'department': department})
-
 
 def no_role(request):
     return render(request, 'core/no_role.html', {'message': "No role assigned. Please contact the admin."})

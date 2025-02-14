@@ -136,3 +136,12 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+LOGIN_URL = "/login/"  # Redirects unauthenticated users to login page
+LOGIN_REDIRECT_URL = "/department/user_dashboard/"  # Use the correct path # or the correct path # Redirect after successful login
+LOGOUT_REDIRECT_URL = "/login/"  # Redirect after logout
+
+
+
+
+
+
