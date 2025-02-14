@@ -16,6 +16,9 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Override username field to remove restrictions
+    username = models.CharField(max_length=150, unique=True, blank=False)
+
     # Fix conflicts with Django's auth.User model
     groups = models.ManyToManyField(
         "auth.Group",

@@ -9,8 +9,10 @@ import logging
 
 def create_employee(request):
     print("➡️ create_employee function called!")  # Debugging
-    departments = Department.objects.all()  # ✅ Get all departments
-    roles = Role.objects.all()  # ✅ Get all roles
+
+    # ✅ Fetch only active departments and roles using `status`
+    departments = Department.objects.filter(status=True)  # Assuming `status=True` means active
+    roles = Role.objects.filter(status=True)  # Assuming `status=True` means active
 
     if request.method == "POST":
         print("✅ Received POST request")  # Debugging
@@ -19,22 +21,22 @@ def create_employee(request):
             print("✅ Form is valid")  # Debugging
             employee = form.save(commit=False)
 
-            # ✅ Fetch department safely
-            department_id = request.POST.get('dept_id')  # Make sure 'dept_id' exists in form
+            # ✅ Fetch active department safely
+            department_id = request.POST.get('dept_id')
             print(f"🔎 department_id: {department_id}")  # Debugging
-            department = Department.objects.filter(dept_id=department_id).first()
+            department = Department.objects.filter(dept_id=department_id, status=True).first()
             if not department:
-                messages.error(request, "❌ Invalid department selected")
-                print("❌ Invalid department")  # Debugging
+                messages.error(request, "❌ Invalid or inactive department selected")
+                print("❌ Invalid or inactive department")  # Debugging
                 return render(request, 'core/employee_form.html', {'form': form, 'departments': departments, 'roles': roles})
 
-            # ✅ Fetch role safely
+            # ✅ Fetch active role safely
             role_id = request.POST.get('role_id')
             print(f"🔎 role_id: {role_id}")  # Debugging
-            role = Role.objects.filter(id=role_id).first()
+            role = Role.objects.filter(id=role_id, status=True).first()
             if not role:
-                messages.error(request, "❌ Invalid role selected")
-                print("❌ Invalid role")  # Debugging
+                messages.error(request, "❌ Invalid or inactive role selected")
+                print("❌ Invalid or inactive role")  # Debugging
                 return render(request, 'core/employee_form.html', {'form': form, 'departments': departments, 'roles': roles})
 
             # ✅ Assign department and role
@@ -56,7 +58,6 @@ def create_employee(request):
     return render(request, 'core/employee_form.html', {'form': form, 'departments': departments, 'roles': roles})
 
 
-
 @login_required
 @user_passes_test(lambda u: u.is_superuser or u.role.role_name == "HR")
 def employee_list(request):
@@ -74,8 +75,10 @@ def update_employee(request, employee_id):
     logger.debug(f"🔍 Fetching employee with ID: {employee_id}")
 
     employee = get_object_or_404(User, pk=employee_id)
-    departments = Department.objects.all()
-    roles = Role.objects.all()
+
+    # ✅ Fetch only active departments and roles
+    departments = Department.objects.filter(status=True)  # Assuming `status=True` means active
+    roles = Role.objects.filter(status=True)  # Assuming `status=True` means active
     managers = User.objects.exclude(pk=employee.pk)
 
     if request.method == "POST":
@@ -87,16 +90,27 @@ def update_employee(request, employee_id):
         if form.is_valid():
             logger.debug("✅ Form is valid")
 
-            # ✅ Fetch department safely using the correct field
-            department = Department.objects.filter(dept_id=request.POST.get('department')).first()
-            logger.debug(f"🔎 Selected Department: {department}")
+            # ✅ Fetch active department safely
+            department_id = request.POST.get('department')
+            department = Department.objects.filter(dept_id=department_id, status=True).first()
+            if department:
+                logger.debug(f"🔎 Selected Department: {department}")
+            else:
+                logger.warning(f"⚠️ Department with ID {department_id} not found or inactive")
+                department = None
 
-            # ✅ Fetch role safely using the correct field
-            role = Role.objects.filter(id=request.POST.get('role')).first()
-            logger.debug(f"🔎 Selected Role: {role}")
+            # ✅ Fetch active role safely, assign "N/A" if not found
+            role_id = request.POST.get('role')
+            role = Role.objects.filter(id=role_id, status=True).first()
+            if role:
+                logger.debug(f"🔎 Selected Role: {role}")
+            else:
+                logger.warning(f"⚠️ Role with ID {role_id} not found or inactive")
+                role = Role.objects.create(role_name="N/A", status=True)  # Ensure "N/A" exists
 
             # ✅ Fetch manager (Optional)
-            manager = User.objects.filter(pk=request.POST.get('manager_id')).first() if request.POST.get('manager_id') else None
+            manager_id = request.POST.get('manager_id')
+            manager = User.objects.filter(pk=manager_id).first() if manager_id else None
             logger.debug(f"🔎 Selected Manager: {manager}")
 
             # ✅ Assign updated values
@@ -124,7 +138,6 @@ def update_employee(request, employee_id):
         'managers': managers, 
         'employee': employee
     })
-
 
 
 
