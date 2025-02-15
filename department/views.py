@@ -9,6 +9,16 @@ from roles.models import Role, UserRole
 from employe.models import Employe_User 
 from django.urls import reverse
 
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.shortcuts import render, redirect
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.template.loader import render_to_string
+from django.http import HttpResponse
+from django.conf import settings
+
 
 def index(request):
     return render(request, 'core/index.html')
@@ -140,3 +150,53 @@ def delete_department(request, dept_id):
 
 def no_role(request):
     return render(request, 'core/no_role.html', {'message': "No role assigned. Please contact the admin."})
+
+
+def Forgot_pass(request):
+    if request.method == 'POST':
+        email = request.POST['email']
+        user = Employe_User.objects.filter(email=email).first()
+        if user:
+            token = default_token_generator.make_token(user)
+            uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+            reset_url = request.build_absolute_uri(f'/reset_password/{uidb64}/{token}/')           
+            send_mail(
+                'Password Reset',
+                f'Click the following link to reset your password: {reset_url}',
+                settings.EMAIL_HOST_USER, 
+                [email],
+                fail_silently=False,
+            )
+            messages.success(request, 'Password reset link has been sent to your email.')
+            return redirect('success_page')
+        else:
+            messages.success(request,'please enter valid email address')
+    return render(request,"core/forgat_Password.html")
+
+def success_page(request):
+    return render(request, 'core/success.html')
+
+
+def reset_password(request, uidb64, token):
+    if request.method == 'POST':
+        password = request.POST['password']
+        password2 = request.POST['password2']
+        if password == password2:
+            try:
+                uid = force_str(urlsafe_base64_decode(uidb64))
+                user = Employe_User.objects.get(pk=uid)
+                if default_token_generator.check_token(user, token):
+                    user.set_password(password)
+                    user.save()
+                    return redirect('passwordresetdone')
+                else:
+                    return HttpResponse('Token is invalid', status=400)
+            except (TypeError, ValueError, OverflowError, Employe_User.DoesNotExist):
+                return HttpResponse('Invalid link', status=400)
+        else:
+            return HttpResponse('Passwords do not match', status=400)
+    return render(request, 'core/reset_password.html')
+
+def password_reset_done(request):
+    return render(request, 'core/password_reset_done.html')
+

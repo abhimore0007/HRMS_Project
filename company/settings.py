@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-u)8_9#5*k=imhv%+fa20el507jeujua$c-_5izhl$+rqr12(05'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG=False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     'hrms-xno7.onrender.com',  # Add your Render domain
@@ -148,6 +148,15 @@ LOGIN_REDIRECT_URL = "/department/user_dashboard/"  # Use the correct path # or 
 LOGOUT_REDIRECT_URL = "/login/"  # Redirect after logout
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Brevo's SMTP server
+EMAIL_PORT = 587  # SMTP port for TLS
+EMAIL_USE_TLS = True  # Use TLS for secure connection
+EMAIL_HOST_USER = 'abhishekmore504@gmail.com'  # This is the Brevo SMTP login email
+EMAIL_HOST_PASSWORD = 'mfzj vvhu fctg xfyr'  # Brevo SMTP password
+DEFAULT_FROM_EMAIL = 'abhishekmore504@gmail.com'  # Your Gmail address (or a verified Brevo email address)
 
 
 

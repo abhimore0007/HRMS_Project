@@ -11,6 +11,10 @@ urlpatterns = [
     path('add/', views.add_department, name='add_department'),
     path('update/<int:dept_id>/', views.update_department, name='update_department'),
     path('delete/<int:dept_id>/', views.delete_department, name='delete_department'),
-    path('no_role/', views.no_role, name='no_role_page'),  # Add this new view
+    path('no_role/', views.no_role, name='no_role_page'),
+    path('Forgot_Password/', views.Forgot_pass, name='Forgotpass'),  # Add this new view
+    path('success/', views.success_page, name='success_page'),
+    path('reset_password/<uidb64>/<token>/', views.reset_password, name='resetpassword'),
+    path('password_reset_done/', views.password_reset_done, name='passwordresetdone'),
 ]
 
