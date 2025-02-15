@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Must be here
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -133,7 +134,13 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # This should be correct
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# If you manually added a 'static' folder for custom styles
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static')
+]
+ # This should be correct
 
 
 # Default primary key field type
