@@ -136,12 +136,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# If you manually added a 'static' folder for custom styles
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static')
-]
- # This should be correct
-
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -153,7 +147,7 @@ LOGIN_URL = "/login/"  # Redirects unauthenticated users to login page
 LOGIN_REDIRECT_URL = "/department/user_dashboard/"  # Use the correct path # or the correct path # Redirect after successful login
 LOGOUT_REDIRECT_URL = "/login/"  # Redirect after logout
 
-
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 
