@@ -1,0 +1,28 @@
+    <h2>Task List</h2>
+    <a href="{% url 'create_task' %}">Create New Task</a>
+    <a href="{% url 'assign_task' %}">Assign Task</a>
+
+    <table border="1">
+        <tr>
+            <th>Title</th>
+            <th>Priority</th>
+            <th>Type</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Actions</th>
+        </tr>
+        {% for task in tasks %}
+        <tr>
+            <td>{{ task.task_title }}</td>
+            <td>{{ task.task_priority }}</td>
+            <td>{{ task.task_type }}</td>
+            <td>{{ task.start_date }}</td>
+            <td>{{ task.end_date }}</td>
+            <td>
+                <a href="{% url 'edit_task' task.id %}">Edit</a> |
+                <a href="{% url 'delete_task' task.id %}">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
