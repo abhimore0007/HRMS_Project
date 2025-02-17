@@ -145,8 +145,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 
- # Where the user is redirected after login
-LOGIN_URL = 'login'
+#  # Where the user is redirected after login
+# LOGIN_URL = 'login'
 
 
 

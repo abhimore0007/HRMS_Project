@@ -2,6 +2,8 @@ from django import forms
 from .models import Employe_User
 from roles.models import Role
 from department.models import Department
+from django.contrib.auth.forms import UserCreationForm,AuthenticationForm,PasswordChangeForm,UserChangeForm
+from django.contrib.auth.models import User
 
 class EmployeeForm(forms.ModelForm):
     password = forms.CharField(

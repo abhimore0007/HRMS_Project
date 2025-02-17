@@ -57,7 +57,7 @@ def user_login(request):
             return redirect("department_dashboard")
         else:
             print("Redirecting to user_dashboard...")
-            return redirect("user_dashboard")
+            return redirect("/user_dashboard/")
 
     return render(request, "core/login.html")
 
