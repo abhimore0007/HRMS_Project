@@ -51,12 +51,13 @@ def user_login(request):
 
         login(request, user)
 
+
         if user.is_superuser:
             print("Redirecting to department_dashboard...")
             return redirect("department_dashboard")
         else:
             print("Redirecting to user_dashboard...")
-            return redirect("/user_dashboard/")
+            return redirect("user_dashboard")
 
     return render(request, "core/login.html")
 

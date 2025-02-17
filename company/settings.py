@@ -145,8 +145,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 
-LOGIN_URL = "/login/"  # Update to match your login route
-LOGIN_REDIRECT_URL = "/dashboard/"  # Where the user is redirected after login
+ # Where the user is redirected after login
+LOGIN_URL = 'login'
 
 
 
