@@ -25,6 +25,8 @@ SECRET_KEY = 'django-insecure-u)8_9#5*k=imhv%+fa20el507jeujua$c-_5izhl$+rqr12(05
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
+
 ALLOWED_HOSTS = [
     'hrms-xno7.onrender.com',  # Add your Render domain
     'localhost',  # Useful for local testing
@@ -53,9 +55,13 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',  # ✅ Correct placement
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+SESSION_COOKIE_SECURE = False 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # ✅ Correct placement
 ]
 
 ROOT_URLCONF = 'company.urls'
@@ -138,15 +144,18 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
+
+LOGIN_URL = "/login/"  # Update to match your login route
+LOGIN_REDIRECT_URL = "/dashboard/"  # Where the user is redirected after login
+
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-LOGIN_URL = "/login/"  # Redirects unauthenticated users to login page
-LOGIN_REDIRECT_URL = "/department/user_dashboard/"  # Use the correct path # or the correct path # Redirect after successful login
-LOGOUT_REDIRECT_URL = "/login/"  # Redirect after logout
+ # Redirect to homepage or dashboard after login
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
@@ -158,6 +167,9 @@ EMAIL_USE_TLS = True  # Use TLS for secure connection
 EMAIL_HOST_USER = 'abhishekmore504@gmail.com'  # This is the Brevo SMTP login email
 EMAIL_HOST_PASSWORD = 'mfzj vvhu fctg xfyr'  # Brevo SMTP password
 DEFAULT_FROM_EMAIL = 'abhishekmore504@gmail.com'  # Your Gmail address (or a verified Brevo email address)
+
+
+
 
 
 

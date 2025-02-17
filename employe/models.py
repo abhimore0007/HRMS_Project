@@ -11,7 +11,7 @@ class Employe_User(AbstractUser):
     mobile = models.CharField(max_length=100, unique=True)
     dept = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="employees")
     role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, related_name="users")
-    reporting_manager = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True)
+    reporting_manager = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True,related_name="team_members")
     date_of_joining = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

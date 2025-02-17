@@ -1,114 +1,76 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .navbar {
-            background-color: #ffffff !important;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .navbar-brand, .nav-link {
-            color: #000 !important;
-        }
-        .nav-link.logout {
-            transition: background-color 0.3s ease-in-out;
-            padding: 5px 10px;
-            border-radius: 5px;
-        }
-        .nav-link.logout:hover {
-            background-color: rgba(25, 127, 190, 0.8);
-            color: white !important;
-        }
-        .card-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-            padding: 20px;
-        }
-        .user-card {
-            width: 350px;
-            border-radius: 15px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            background: white;
-            padding: 20px;
-            text-align: center;
-            transition: transform 0.3s;
-        }
-        .user-card:hover {
-            transform: translateY(-5px);
-        }
-        .user-card h5 {
-            margin-bottom: 10px;
-            font-weight: bold;
-            color: #007bff;
-        }
-        .user-card p {
-            margin: 5px 0;
-            color: #555;
-            font-size: 16px;
-        }
-        .alert {
-            max-width: 600px;
-            margin: 0 auto 20px;
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg">
-        <div class="container">
-            <a class="navbar-brand" href="#">Dashboard</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <span class="nav-link">Welcome, <strong>{{ request.user.username }}</strong></span>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link logout btn btn-danger text-white" href="/logout/">Logout</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
 
-    <div class="container mt-4">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} text-center">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
+<h2>User Dashboard</h2>
 
-        <div class="card-container">
-            {% for user in users %}
-            <div class="user-card">
-                <h5>{{ user.first_name }} {{ user.last_name }}</h5>
-                <p><strong>Department:</strong> {{ user.dept.dept_name|default:"N/A" }}</p>
-                <p><strong>Role:</strong> {{ user.role.role_name|default:"N/A" }}</p>
-                <p><strong>Manager:</strong> 
-                    {% if user.reporting_manager %}
-                        {{ user.reporting_manager.first_name }} {{ user.reporting_manager.last_name }}
-                    {% else %}
-                        N/A
-                    {% endif %}
-                </p>
-            </div>
-            {% empty %}
-            <p class="text-center text-muted">No users found.</p>
-            {% endfor %}
-        </div>
-    </div>
+<!-- Department, Role, and Manager Filters -->
+<form method="get">
+    <label>Department:</label>
+    <select name="department">
+        <option value="">All</option>
+        {% for dept in departments %}
+            <option value="{{ dept.id }}">{{ dept.name }}</option>
+        {% endfor %}
+    </select>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    <label>Role:</label>
+    <select name="role">
+        <option value="">All</option>
+        {% for role in roles %}
+            <option value="{{ role.id }}">{{ role.role_name }}</option>
+        {% endfor %}
+    </select>
+
+    <label>Manager:</label>
+    <select name="manager">
+        <option value="">All</option>
+        {% for manager in managers %}
+            <option value="{{ manager.id }}">{{ manager.first_name }} {{ manager.last_name }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Filter</button>
+</form>
+
+<!-- User List -->
+<h3>Employees</h3>
+<table border="1">
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Department</th>
+    </tr>
+    {% for user in users %}
+    <tr>
+        <td>{{ user.first_name }} {{ user.last_name }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.role.role_name }}</td>
+        <td>{{ user.dept.name }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">No users found.</td></tr>
+    {% endfor %}
+</table>
+
+<!-- Assigned Tasks -->
+<h3>Assigned Tasks</h3>
+<table border="1">
+    <tr>
+        <th>Task</th>
+        <th>Status</th>
+        <th>Assigned By</th>
+        <th>Assigned Date</th>
+        <th>Update</th>
+    </tr>
+    {% for task in assigned_tasks %}
+    <tr>
+        <td>{{ task.task.task_title }}</td>
+        <td>{{ task.status }}</td>
+        <td>{{ task.assigned_by.first_name }} {{ task.assigned_by.last_name }}</td>
+        <td>{{ task.assigned_date }}</td>
+        <td><a href="{% url 'update_task_status' task.assignment_id %}">Update</a></td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5">No tasks assigned yet.</td></tr>
+    {% endfor %}
+</table>
+

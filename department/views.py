@@ -18,33 +18,44 @@ from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.conf import settings
+from task.models import Task
+from django.views.decorators.csrf import csrf_exempt
+from task.models import TaskAssignment
 
 
 def index(request):
     return render(request, 'core/index.html')
-
 
 def user_login(request):
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
 
+        print(f"Attempting login for username: {username}")  # Debugging
+
         user = authenticate(request, username=username, password=password)
 
-        if user is None:
+        if user is None:  # If authentication fails for built-in User model
+            print("User not found in built-in User model, checking Employe_User...")
             try:
                 user = Employe_User.objects.get(username=username)
-                if not user.check_password(password):  # Manually check password
+                if not user.check_password(password):  # Check password manually
+                    print("Password check failed for Employe_User.")
                     raise Employe_User.DoesNotExist
             except Employe_User.DoesNotExist:
+                print("User not found in Employe_User model.")
                 messages.error(request, "Invalid username or password!")
                 return redirect("login")
 
-            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+        print(f"Login successful for user: {user.username} (Superuser: {user.is_superuser})")
+
+        login(request, user)
 
         if user.is_superuser:
+            print("Redirecting to department_dashboard...")
             return redirect("department_dashboard")
         else:
+            print("Redirecting to user_dashboard...")
             return redirect("/user_dashboard/")
 
     return render(request, "core/login.html")
@@ -53,14 +64,18 @@ def user_logout(request):
     logout(request)
     return redirect('index')
 
-# @login_required
+@login_required
 def user_dashboard(request):
+    """Dashboard displaying users and assigned tasks."""
+    print("user dashboard successfull redirect") 
+    user=request.user
+    print(f"{user} is the user")
     department_id = request.GET.get('department')
     role_id = request.GET.get('role')
     manager_id = request.GET.get('manager')
 
+    # Fetch users
     users = Employe_User.objects.all()
-    
     if department_id:
         users = users.filter(dept_id=department_id)
     if role_id:
@@ -68,6 +83,10 @@ def user_dashboard(request):
     if manager_id:
         users = users.filter(reporting_manager_id=manager_id)
 
+    # Fetch assigned tasks related to the logged-in user
+    assigned_tasks = TaskAssignment.objects.filter(employee=request.user)
+
+    # Fetch all departments, roles, and managers
     departments = Department.objects.all()
     roles = Role.objects.all()
     managers = Employe_User.objects.filter(role__role_name="Manager")
@@ -76,12 +95,13 @@ def user_dashboard(request):
         'users': users,
         'departments': departments,
         'roles': roles,
-        'managers': managers
+        'managers': managers,
+        'assigned_tasks': assigned_tasks  # Pass tasks to the template
     })
 
 # Dashboard View
 def department_dashboard(request):
-    if request.user.is_staff:
+    if not request.user.is_staff:
         messages.error(request, "Access denied!")
         return redirect('index')
     departments = Department.objects.filter(status=True)
@@ -199,4 +219,9 @@ def reset_password(request, uidb64, token):
 
 def password_reset_done(request):
     return render(request, 'core/password_reset_done.html')
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------
+
+
 
