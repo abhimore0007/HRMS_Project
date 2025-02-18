@@ -1,73 +1,169 @@
-<h2>Task List</h2>
-{% if user.is_staff %}
-    <a href="{% url 'task_create' %}">Create Task</a>
-    <a href="{% url 'assign_task' %}">Assign Task</a>
-{% endif %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
 
-<!-- Tasks Table -->
-<h3>All Tasks</h3>
-<table border="1">
-    <tr>
-        <th>Title</th>
-        <th>Description</th>
-        <th>Priority</th>
-        <th>Start Date</th>
-        <th>End Date</th>
-        {% if user.is_staff %}<th>Actions</th>{% endif %}
-    </tr>
-    {% for task in tasks %}
-    <tr>
-        <td>{{ task.task_title }}</td>
-        <td>{{ task.task_description }}</td>
-        <td>{{ task.task_priority }}</td>
-        <td>{{ task.start_date }}</td>
-        <td>{{ task.end_date }}</td>
-        {% if user.is_staff %}
-        <td>
-            {% if task.task_id %}
-                <a href="{% url 'task_update' task.task_id %}">Edit</a> 
-                <a href="{% url 'task_delete' task.task_id %}">Delete</a>
-            {% else %}
-                <span>Error: Task ID Missing</span>
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            color: #555;
+            margin-top: 20px;
+        }
+
+        /* Links Styling */
+        a {
+            color: #008CBA;
+            text-decoration: none;
+            padding: 5px 15px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        a:hover {
+            background-color: #007B9C;
+            color: white;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        td {
+            background-color: white;
+        }
+
+        td a {
+            background-color: #f1f1f1;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        td a:hover {
+            background-color: #ddd;
+        }
+
+        /* Empty Row Styling */
+        tr.empty-row {
+            text-align: center;
+            font-style: italic;
+            color: #888;
+        }
+
+        /* Admin Actions (Edit, Delete) */
+        .admin-actions a {
+            margin-right: 10px;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    
+    <h2>Task List</h2>
+
+        <div>
+            <a href="{% url 'task_create' %}">Create Task</a>
+            <a href="{% url 'assign_task' %}">Assign Task</a>
+        </div>
+
+    <h3>All Tasks</h3>
+    <table>
+        <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Priority</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            {% if user.is_staff %}<th>Actions</th>{% endif %}
+        </tr>
+        {% for task in tasks %}
+        <tr>
+            <td>{{ task.task_title }}</td>
+            <td>{{ task.task_description }}</td>
+            <td>{{ task.task_priority }}</td>
+            <td>{{ task.start_date }}</td>
+            <td>{{ task.end_date }}</td>
+            {% if user.is_staff %}
+            <td class="admin-actions">
+                {% if task.task_id %}
+                    <a href="{% url 'task_update' task.task_id %}">Edit</a>
+                    <a href="{% url 'task_delete' task.task_id %}">Delete</a>
+                {% else %}
+                    <span>Error: Task ID Missing</span>
+                {% endif %}
+            </td>
             {% endif %}
-        </td>
-        {% endif %}
-    </tr>
-    {% empty %}
-    <tr><td colspan="6">No tasks available</td></tr>
-    {% endfor %}
-</table>
+        </tr>
+        {% empty %}
+        <tr class="empty-row"><td colspan="6">No tasks available</td></tr>
+        {% endfor %}
+    </table>
 
-<h3>Assigned Tasks</h3>
-<table border="1">
-    <tr>
-        <th>Task</th>
-        <th>Assigned Employee</th>
-        <th>Status</th>
-        <th>Assigned By</th>
-        <th>Assigned Date</th>
-        {% if not user.is_staff %}<th>Update Status</th>{% endif %}
-    </tr>
-    {% for assignment in assigned_tasks %}
-    <tr>
-        <td>{{ assignment.task.task_title }}</td>
-        <td>{{ assignment.employee.first_name }} {{ assignment.employee.last_name }}</td>
-        <td>{{ assignment.status }}</td>
+    <h3>Assigned Tasks</h3>
+    <table>
+        <tr>
+            <th>Task</th>
+            <th>Assigned Employee</th>
+            <th>Status</th>
+            <th>Assigned By</th>
+            <th>Assigned Date</th>
+            {% if not user.is_staff %}<th>Update Status</th>{% endif %}
+        </tr>
+        {% for assignment in assigned_tasks %}
+        <tr>
+            <td>{{ assignment.task.task_title }}</td>
+            <td>{{ assignment.employee.first_name }} {{ assignment.employee.last_name }}</td>
+            <td>{{ assignment.status }}</td>
+            <td>
+                {% if assignment.assigned_by_name %}
+                    {{ assignment.assigned_by_name }}
+                {% else %}
+                    {{ assignment.assigned_by.first_name }} {{ assignment.assigned_by.last_name }}
+                {% endif %}
+            </td>
+            <td>{{ assignment.assigned_date }}</td>
+            <td>
+                <a href="{% url 'update_task_status' assignment.assignment_id %}">Update</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr class="empty-row"><td colspan="6">No tasks assigned yet.</td></tr>
+        {% endfor %}
+    </table>
 
-        <!-- ✅ Fix: Show Admin name or assigned employee name -->
-        <td>
-            {% if assignment.assigned_by_name %}
-                {{ assignment.assigned_by_name }}
-            {% else %}
-                {{ assignment.assigned_by.first_name }} {{ assignment.assigned_by.last_name }}
-            {% endif %}
-        </td>
-        
-
-        <td>{{ assignment.assigned_date }}</td>
-        <td><a href="{% url 'update_task_status' assignment.assignment_id %}">Update</a></td>
-    </tr>
-    {% empty %}
-    <tr><td colspan="6">No tasks assigned yet.</td></tr>
-    {% endfor %}
-</table>
+</body>
+</html>

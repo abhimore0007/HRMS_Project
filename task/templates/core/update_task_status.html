@@ -1,13 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Task Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
 
-<h2>Update Task Status</h2>
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
 
-<form method="post">
-    {% csrf_token %}
-    <table>
-        {{ form.as_table }}
-    </table>
-    <button type="submit">Update</button>
-</form>
+        form {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
 
-<a href="{% url 'task_list' %}">Back to Task List</a>
+        table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
 
+        table th,
+        table td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        table td {
+            background-color: white;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 15px;
+            color: #008CBA;
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 4px;
+            padding: 5px 15px;
+            transition: background-color 0.3s ease;
+        }
+
+        a:hover {
+            background-color: #007B9C;
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h2>Update Task Status</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        <table>
+            {{ form.as_table }}
+        </table>
+        <button type="submit">Update</button>
+    </form>
+
+    <a href="{% url 'task_list' %}">Back to Task List</a>
+
+</body>
+</html>

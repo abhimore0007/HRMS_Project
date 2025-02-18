@@ -7,8 +7,10 @@ from django.utils import timezone
 from employe.models import Employe_User
 
 
-@login_required
+
 def task_list(request):
+    user=request.user
+    print(f"user dashboard successfull redirect {user}")
     """Fetches all tasks and assigned tasks for display."""
     tasks = Task.objects.all()  # Fetch all tasks
     assigned_tasks = TaskAssignment.objects.all()  # Fetch all assigned tasks
@@ -19,7 +21,7 @@ def task_list(request):
     })
 
 
-@login_required
+
 def task_create(request):
     """Create a new task."""
     if request.method == 'POST':
@@ -38,7 +40,7 @@ def task_create(request):
 
 
 
-@login_required
+
 def task_update(request, task_id):
     """Allows the admin to update a task."""
     task = get_object_or_404(Task, pk=task_id)
@@ -75,14 +77,10 @@ def task_delete(request, task_id):
 
 
 
-@login_required
 def assign_task(request):
     """View for assigning tasks to employees."""
     print(f"User: {request.user}, Superuser: {request.user.is_superuser}, Role: {getattr(request.user, 'role', 'No role')} - Trying to assign a task")
 
-    if not request.user.is_superuser and (not hasattr(request.user, 'role') or request.user.role not in ['manager', 'hr']):
-        print("Access denied: User does not have the required role.")
-        return redirect("task_list")  # Redirect if user lacks permission
 
     if request.method == "POST":
         print("Received POST request for task assignment")
@@ -116,7 +114,7 @@ def assign_task(request):
     return render(request, "core/task_assign.html", {"form": form})
 
 
-@login_required
+
 def update_task_status(request, assignment_id):
     """Allows assigned employees, managers, and superusers to update task status."""
     assignment = get_object_or_404(TaskAssignment, pk=assignment_id)

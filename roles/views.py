@@ -73,11 +73,11 @@ def assign_role(request):
         form = UserRoleForm()
     return render(request, 'core/Assign_role.html', {'form': form})
 
-@login_required
-def user_dashboard(request):
-    user_role = get_object_or_404(UserRole, user=request.user)
-    user_permissions = user_role.permissions.all()
-    return render(request, 'core/user_dashboard.html', {'user_role': user_role, 'user_permissions': user_permissions})
+# @login_required
+# def user_dashboard(request):
+#     user_role = get_object_or_404(UserRole, user=request.user)
+#     user_permissions = user_role.permissions.all()
+#     return render(request, 'core/user_dashboard.html', {'user_role': user_role, 'user_permissions': user_permissions})
 
 def activate_role(request, role_id):
     role = get_object_or_404(Role, id=role_id)

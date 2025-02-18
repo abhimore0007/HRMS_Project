@@ -4,7 +4,7 @@ from department.models import Department
 from roles.models import Role
 
 class Employe_User(AbstractUser):
-    employee_id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)

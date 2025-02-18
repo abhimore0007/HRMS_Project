@@ -1,8 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assign Task</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
 
-<h2>Assign Task</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Assign</button>
-</form>
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 24px;
+        }
 
+        form {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        form button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            margin-top: 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+        form button:hover {
+            background-color: #45a049;
+        }
+
+        form input, form select, form textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        form input[type="submit"] {
+            background-color: #008CBA;
+            color: white;
+        }
+
+        form input[type="submit"]:hover {
+            background-color: #007B9C;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
+
+        .form-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div>
+        <h2>Assign Task</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-section">
+                <label for="task_title" class="form-title">Task Title</label>
+                {{ form.task_title }}
+                {% if form.task_title.errors %}
+                    <div class="error">{{ form.task_title.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-section">
+                <label for="assigned_to" class="form-title">Assign To</label>
+                {{ form.assigned_to }}
+                {% if form.assigned_to.errors %}
+                    <div class="error">{{ form.assigned_to.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-section">
+                <label for="task_description" class="form-title">Description</label>
+                {{ form.task_description }}
+                {% if form.task_description.errors %}
+                    <div class="error">{{ form.task_description.errors }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit">Assign</button>
+        </form>
+    </div>
+
+</body>
+</html>

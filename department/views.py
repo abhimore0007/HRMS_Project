@@ -3,11 +3,13 @@ from django.contrib import messages
 from .models import Department
 from .forms import DepartmentForm
 from django.contrib.auth.models import User 
-from django.contrib.auth import authenticate, login, logout, get_user_model
+from django.contrib.auth import authenticate, login as auth_login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from roles.models import Role, UserRole
 from employe.models import Employe_User 
 from django.urls import reverse
+from .CustomAuthentication import custom_authenticate,custom_login
+from .login_required_Decorator import custom_login_required
 
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.models import User
@@ -28,81 +30,40 @@ def index(request):
 
 def user_login(request):
     if request.method == "POST":
-        username = request.POST.get("username")
-        password = request.POST.get("password")
+        username = request.POST["username"]
+        password = request.POST["password"]
 
-        print(f"Attempting login for username: {username}")  # Debugging
+        user = custom_authenticate(username, password)  # Authenticate user
 
-        user = authenticate(request, username=username, password=password)
+        if user:
+            auth_login(request, user)  # Log the user in (pass the user object)
 
-        if user is None:  # If authentication fails for built-in User model
-            print("User not found in built-in User model, checking Employe_User...")
-            try:
-                user = Employe_User.objects.get(username=username)
-                if not user.check_password(password):  # Check password manually
-                    print("Password check failed for Employe_User.")
-                    raise Employe_User.DoesNotExist
-            except Employe_User.DoesNotExist:
-                print("User not found in Employe_User model.")
-                messages.error(request, "Invalid username or password!")
-                return redirect("login")
+            # Redirect based on user role
+            if user.is_superuser:
+                return redirect("department_dashboard")
+            else:
+                return redirect("/user_dashboard/")
 
-        print(f"Login successful for user: {user.username} (Superuser: {user.is_superuser})")
-
-        login(request, user)
-
-
-        if user.is_superuser:
-            print("Redirecting to department_dashboard...")
-            return redirect("department_dashboard")
         else:
-            print("Redirecting to user_dashboard...")
-            return redirect("/user_dashboard/")
+            messages.error(request, "Invalid username or password")
 
     return render(request, "core/login.html")
+
 
 def user_logout(request):
     logout(request)
     return redirect('index')
 
-@login_required
+@custom_login_required
 def user_dashboard(request):
     """Dashboard displaying users and assigned tasks."""
-    print("user dashboard successfull redirect") 
     user=request.user
-    print(f"{user} is the user")
-    department_id = request.GET.get('department')
-    role_id = request.GET.get('role')
-    manager_id = request.GET.get('manager')
-
-    # Fetch users
-    users = Employe_User.objects.all()
-    if department_id:
-        users = users.filter(dept_id=department_id)
-    if role_id:
-        users = users.filter(role_id=role_id)
-    if manager_id:
-        users = users.filter(reporting_manager_id=manager_id)
-
-    # Fetch assigned tasks related to the logged-in user
-    assigned_tasks = TaskAssignment.objects.filter(employee=request.user)
-
-    # Fetch all departments, roles, and managers
-    departments = Department.objects.all()
-    roles = Role.objects.all()
-    managers = Employe_User.objects.filter(role__role_name="Manager")
-
-    return render(request, 'core/user_dashboard.html', {
-        'users': users,
-        'departments': departments,
-        'roles': roles,
-        'managers': managers,
-        'assigned_tasks': assigned_tasks  # Pass tasks to the template
-    })
+    print(f"user dashboard successfull redirect {user}") 
+    return render(request, 'core/user_dashboard.html')
 
 # Dashboard View
 def department_dashboard(request):
-    if not request.user.is_staff:
+    if not request.user.is_superuser:
         messages.error(request, "Access denied!")
         return redirect('index')
     departments = Department.objects.filter(status=True)
