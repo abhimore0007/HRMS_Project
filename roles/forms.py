@@ -1,7 +1,9 @@
 from django import forms
 from django.contrib.auth.models import User, Permission
 from .models import UserRole, Role
+from django.contrib.auth import get_user_model
 
+User = get_user_model() 
 
 class RoleForm(forms.ModelForm):
     class Meta:

@@ -3,7 +3,7 @@ from django.contrib import messages
 from .models import Department
 from .forms import DepartmentForm
 from django.contrib.auth.models import User 
-from django.contrib.auth import authenticate, login as auth_login, logout, get_user_model
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from roles.models import Role, UserRole
 from employe.models import Employe_User 
@@ -28,46 +28,83 @@ from task.models import TaskAssignment
 def index(request):
     return render(request, 'core/index.html')
 
+User = get_user_model()  # Get custom user model
+
+
 def user_login(request):
     if request.method == "POST":
-        username = request.POST["username"]
-        password = request.POST["password"]
+        email = request.POST.get("email")  # Fetch email correctly
+        password = request.POST.get("password")
 
-        user = custom_authenticate(username, password)  # Authenticate user
+        if not email:
+            print("❌ Email is None or empty")
+            messages.error(request, "Email field is required")
+            return render(request, "core/login.html")
 
-        if user:
-            auth_login(request, user)  # Log the user in (pass the user object)
+        user = custom_authenticate(email=email, password=password)  # Authenticate using email
 
-            # Redirect based on user role
+        if user is not None:
+            login(request, user)
+            print(f"✅ User Authenticated: {user.email}")
+
             if user.is_superuser:
                 return redirect("department_dashboard")
             else:
-                return redirect("/user_dashboard/")
-
+                return redirect("user_dashboard")
         else:
-            messages.error(request, "Invalid username or password")
+            print("❌ Authentication Failed")
+            messages.error(request, "Invalid email or password")
 
     return render(request, "core/login.html")
-
 
 def user_logout(request):
     logout(request)
     return redirect('index')
 
-@custom_login_required
+@login_required
 def user_dashboard(request):
-    """Dashboard displaying users and assigned tasks."""
-    user=request.user
-    print(f"user dashboard successfull redirect {user}") 
-    return render(request, 'core/user_dashboard.html')
+    """Dashboard displaying users, assigned tasks, roles, and departments."""
+    user = request.user
+    employee = get_object_or_404(Employe_User, username=user.username)
+
+    roles = Role.objects.all()
+    departments = Department.objects.all()
+    
+    # Fetch tasks assigned to the logged-in employee
+    assigned_tasks = TaskAssignment.objects.filter(employee=employee).select_related("task")
+
+    print(f"User Dashboard successful redirect for {user}")
+
+    return render(request, 'core/user_dashboard.html', {
+        "user": user,
+        "roles": roles,
+        "departments": departments,
+        "assigned_tasks": assigned_tasks
+    })
 
 # Dashboard View
 def department_dashboard(request):
+    user=request.user
+    print(f"{user} is user")
     if not request.user.is_superuser:
         messages.error(request, "Access denied!")
         return redirect('index')
     departments = Department.objects.filter(status=True)
-    return render(request, 'core/dashboard.html', {'departments': departments})
+
+    department_data = []
+    for dept in departments:
+        active_employees = Employe_User.objects.filter(dept=dept, is_active=True).count()
+        inactive_employees = Employe_User.objects.filter(dept=dept, is_active=False).count()
+        department_data.append({
+            'department': dept,
+            'active_employees': active_employees,
+            'inactive_employees': inactive_employees
+        })
+
+    return render(request, 'core/dashboard.html', {
+        'department_data': department_data,
+        'departments': departments  # Added this line
+    })
 
 def department_details(request, dept_id):
     department = get_object_or_404(Department, dept_id=dept_id)
@@ -183,7 +220,33 @@ def password_reset_done(request):
     return render(request, 'core/password_reset_done.html')
 
 
+@login_required
+def update_task_status(request, assignment_id):
+    """Handles task status updates."""
+    if request.method == "POST":
+        task_assignment = get_object_or_404(TaskAssignment, assignment_id=assignment_id)
+        new_status = request.POST.get("status")
+        task_assignment.status = new_status
+        task_assignment.save()
+        messages.success(request, "Task status updated successfully!")
+    
+    return redirect('user_dashboard')
+
+
 # ---------------------------------------------------------------------------------------------------------------------------------------------
 
+@login_required
+def profile_view(request):
+    user = request.user
+    first_name = user.first_name
+    last_name = user.last_name
 
+    initials = ""
+    if first_name and last_name:
+        initials = f"{first_name[0]}{last_name[0]}"
+    elif first_name:
+        initials = first_name[0]
+    elif last_name:
+        initials = last_name[0]
 
+    return render(request, 'core/profile.html', {'initials': initials})

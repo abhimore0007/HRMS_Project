@@ -115,19 +115,19 @@ def assign_task(request):
 
 
 
-def update_task_status(request, assignment_id):
-    """Allows assigned employees, managers, and superusers to update task status."""
-    assignment = get_object_or_404(TaskAssignment, pk=assignment_id)
+# def update_task_status(request, assignment_id):
+#     """Allows assigned employees, managers, and superusers to update task status."""
+#     assignment = get_object_or_404(TaskAssignment, pk=assignment_id)
 
-    if request.user != assignment.employee and not request.user.is_superuser and getattr(request.user, 'role', '') != "manager":
-        return redirect('task_list')
+#     if request.user != assignment.employee and not request.user.is_superuser and getattr(request.user, 'role', '') != "manager":
+#         return redirect('task_list')
 
-    if request.method == "POST":
-        form = TaskAssignmentForm(request.POST, instance=assignment)
-        if form.is_valid():
-            form.save()
-            return redirect('task_list')
-    else:
-        form = TaskAssignmentForm(instance=assignment)
+#     if request.method == "POST":
+#         form = TaskAssignmentForm(request.POST, instance=assignment)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('task_list')
+#     else:
+#         form = TaskAssignmentForm(instance=assignment)
 
-    return render(request, 'core/update_task_status.html', {'form': form})
+#     return render(request, 'core/update_task_status.html', {'form': form})

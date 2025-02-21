@@ -25,7 +25,11 @@ class TaskAssignment(models.Model):
         Employe_User, on_delete=models.SET_NULL, null=True, blank=True, related_name="assigned_tasks"
     ) 
     assigned_date = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=50, choices=[("Pending", "Pending"), ("In Progress", "In Progress"), ("Completed", "Completed")])
+    status = models.CharField(
+        max_length=50,
+        choices=[("Pending", "Pending"), ("In Progress", "In Progress"), ("Completed", "Completed")],
+        default="Pending"
+    )
     completed_at = models.DateTimeField(null=True, blank=True)
     assigned_by_name = models.CharField(max_length=255, null=True, blank=True)
 

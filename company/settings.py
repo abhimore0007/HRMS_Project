@@ -25,6 +25,11 @@ SECRET_KEY = 'django-insecure-u)8_9#5*k=imhv%+fa20el507jeujua$c-_5izhl$+rqr12(05
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+AUTH_USER_MODEL = 'employe.Employe_User'  # Replace 'yourapp' with your actual app name
+
+AUTHENTICATION_BACKENDS = [
+    "department.backends.EmailAuthBackend",  # Custom backend
+]
 
 
 ALLOWED_HOSTS = [
@@ -60,9 +65,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 SESSION_COOKIE_SECURE = False 
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',  # ✅ Correct placement
-]
+
 
 ROOT_URLCONF = 'company.urls'
 

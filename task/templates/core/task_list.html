@@ -12,14 +12,9 @@
             padding: 20px;
         }
 
-        h2 {
+        h2, h3 {
             color: #333;
             margin-bottom: 20px;
-        }
-
-        h3 {
-            color: #555;
-            margin-top: 20px;
         }
 
         /* Links Styling */
@@ -41,6 +36,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            background: white;
         }
 
         table, th, td {
@@ -61,25 +57,7 @@
             background-color: white;
         }
 
-        td a {
-            background-color: #f1f1f1;
-            padding: 5px 10px;
-            border-radius: 4px;
-            transition: background-color 0.3s ease;
-        }
-
-        td a:hover {
-            background-color: #ddd;
-        }
-
-        /* Empty Row Styling */
-        tr.empty-row {
-            text-align: center;
-            font-style: italic;
-            color: #888;
-        }
-
-        /* Admin Actions (Edit, Delete) */
+        /* Admin Actions */
         .admin-actions a {
             margin-right: 10px;
         }
@@ -93,12 +71,12 @@
 </head>
 <body>
     
-    <h2>Task List</h2>
+    <h2>Task Management Dashboard</h2>
 
-        <div>
-            <a href="{% url 'task_create' %}">Create Task</a>
-            <a href="{% url 'assign_task' %}">Assign Task</a>
-        </div>
+    <div>
+        <a href="{% url 'task_create' %}">Create Task</a>
+        <a href="{% url 'assign_task' %}">Assign Task</a>
+    </div>
 
     <h3>All Tasks</h3>
     <table>
@@ -119,17 +97,13 @@
             <td>{{ task.end_date }}</td>
             {% if user.is_staff %}
             <td class="admin-actions">
-                {% if task.task_id %}
-                    <a href="{% url 'task_update' task.task_id %}">Edit</a>
-                    <a href="{% url 'task_delete' task.task_id %}">Delete</a>
-                {% else %}
-                    <span>Error: Task ID Missing</span>
-                {% endif %}
+                <a href="{% url 'task_update' task.task_id %}">Edit</a>
+                <a href="{% url 'task_delete' task.task_id %}">Delete</a>
             </td>
             {% endif %}
         </tr>
         {% empty %}
-        <tr class="empty-row"><td colspan="6">No tasks available</td></tr>
+        <tr><td colspan="6" style="text-align: center; font-style: italic;">No tasks available</td></tr>
         {% endfor %}
     </table>
 
@@ -156,12 +130,14 @@
                 {% endif %}
             </td>
             <td>{{ assignment.assigned_date }}</td>
+            {% if not user.is_staff %}
             <td>
                 <a href="{% url 'update_task_status' assignment.assignment_id %}">Update</a>
             </td>
+            {% endif %}
         </tr>
         {% empty %}
-        <tr class="empty-row"><td colspan="6">No tasks assigned yet.</td></tr>
+        <tr><td colspan="6" style="text-align: center; font-style: italic;">No assigned tasks available</td></tr>
         {% endfor %}
     </table>
 
