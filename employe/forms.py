@@ -6,7 +6,9 @@ from django.contrib.auth.forms import UserCreationForm,AuthenticationForm,Passwo
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 
+
 User = get_user_model()
+
 class EmployeeForm(forms.ModelForm):
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter Password'}),
@@ -34,17 +36,25 @@ class EmployeeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Set queryset for role field dynamically
+        # Show only active departments
+        self.fields['dept'].queryset = Department.objects.filter(status=True)
+
+        # Show only active roles
         if 'role' in self.fields:
             self.fields['role'].queryset = Role.objects.filter(status=True)
 
-        # Set queryset for reporting manager dynamically
-        self.fields['reporting_manager'].queryset = Employe_User.objects.exclude(role__isnull=True)
-        self.fields['reporting_manager'].widget.attrs.update({'class': 'form-control'})
+        # Show only active reporting managers with roles
+        self.fields['reporting_manager'].queryset = Employe_User.objects.filter(is_active=True).exclude(role__isnull=True)
 
-        # Add 'form-control' class to all fields
+        # Ensure all fields have 'form-control' class
         for field_name, field in self.fields.items():
             field.widget.attrs.setdefault('class', 'form-control')
+
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
+        if not password:
+            raise forms.ValidationError("Password is required!")
+        return password
 
     def save(self, commit=True):
         """Override save method to hash password before saving the user"""

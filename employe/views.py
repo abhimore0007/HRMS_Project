@@ -12,39 +12,55 @@ logger = logging.getLogger(__name__)
 
 def create_employee(request):
     logger.debug("create_employee function called!")
+    print("create_employee function called!")
 
+    # Fetch only active departments and roles
     departments = Department.objects.filter(status=True)
     roles = Role.objects.filter(status=True)
 
     if request.method == "POST":
         logger.debug("Received POST request")
+        print("Received POST request")
+
         form = EmployeeForm(request.POST)
         if form.is_valid():
             logger.debug("Form is valid")
+            print("Form is valid")
+
             employee = form.save(commit=False)
 
-            department_id = request.POST.get('dept_id')
+            # Fetch department and role
+            department_id = form.cleaned_data['dept']
+            print(department_id)
+            role_id = request.POST.get('role_id')
+
             department = Department.objects.filter(dept_id=department_id, status=True).first()
+            role = Role.objects.filter(id=role_id, status=True).first()
+
             if not department:
                 messages.error(request, "Invalid or inactive department selected")
                 return render(request, 'core/employee_form.html', {'form': form, 'departments': departments, 'roles': roles})
 
-            role_id = request.POST.get('role_id')
-            role = Role.objects.filter(id=role_id, status=True).first()
             if not role:
                 messages.error(request, "Invalid or inactive role selected")
                 return render(request, 'core/employee_form.html', {'form': form, 'departments': departments, 'roles': roles})
 
+            # Assign department & role and save employee
             employee.department = department
             employee.role = role
             employee.save()
+
             messages.success(request, "Employee created successfully!")
             return redirect('employee_list')
+        else:
+            print("Form is invalid:", form.errors)
+            messages.error(request, "Please correct the errors below.")
+
     else:
+        print("GET request received")
         form = EmployeeForm()
 
     return render(request, 'core/employee_form.html', {'form': form, 'departments': departments, 'roles': roles})
-
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser or u.role.role_name == "HR")

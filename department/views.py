@@ -250,3 +250,6 @@ def profile_view(request):
         initials = last_name[0]
 
     return render(request, 'core/profile.html', {'initials': initials})
+
+def all_section(request):
+    return render(request,'core/all_section.html')

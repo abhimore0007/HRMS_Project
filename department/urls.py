@@ -17,8 +17,9 @@ urlpatterns = [
     path('reset_password/<uidb64>/<token>/', views.reset_password, name='resetpassword'),
     path('password_reset_done/', views.password_reset_done, name='passwordresetdone'),
     path('update-task-status/<int:assignment_id>/', views.update_task_status, name='update_task_status'),
+    path('Admin_All_Sections/', views.all_section, name='Admin_All_Sections'),
 
 
-     path('profile_view/', views.profile_view, name='profile_view'),
+    path('profile_view/', views.profile_view, name='profile_view'),
 ]
 
