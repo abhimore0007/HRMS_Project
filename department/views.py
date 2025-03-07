@@ -23,6 +23,10 @@ from django.conf import settings
 from task.models import Task
 from django.views.decorators.csrf import csrf_exempt
 from task.models import TaskAssignment
+from django.db.models import Count
+from django.utils.timezone import now
+from performance.models import PerformanceReview
+
 
 
 def index(request):
@@ -84,27 +88,46 @@ def user_dashboard(request):
 
 # Dashboard View
 def department_dashboard(request):
-    user=request.user
+    user = request.user
     print(f"{user} is user")
+
     if not request.user.is_superuser:
         messages.error(request, "Access denied!")
         return redirect('index')
+
+    # Get all active departments
     departments = Department.objects.filter(status=True)
+
+    # Get the current year and month
+    current_year = now().year
+    current_month = now().month
 
     department_data = []
     for dept in departments:
-        active_employees = Employe_User.objects.filter(dept=dept, is_active=True).count()
-        inactive_employees = Employe_User.objects.filter(dept=dept, is_active=False).count()
+        # Count employees in the department
+        total_employees = Employe_User.objects.filter(dept=dept).count()
+
+        # Count Monthly and Annual Performance Reviews
+        monthly_reviews = PerformanceReview.objects.filter(
+            employee__dept=dept, review_period="Monthly", created_at__year=current_year, created_at__month=current_month
+        ).count()
+
+        annual_reviews = PerformanceReview.objects.filter(
+            employee__dept=dept, review_period="Annual", created_at__year=current_year
+        ).count()
+
         department_data.append({
             'department': dept,
-            'active_employees': active_employees,
-            'inactive_employees': inactive_employees
+            'total_employees': total_employees,
+            'monthly_reviews': monthly_reviews,
+            'annual_reviews': annual_reviews
         })
 
     return render(request, 'core/dashboard.html', {
         'department_data': department_data,
-        'departments': departments  # Added this line
+        'departments': departments
     })
+
 
 def department_details(request, dept_id):
     department = get_object_or_404(Department, dept_id=dept_id)
