@@ -1,55 +1,207 @@
 {% load static %}
 
-<div class="container mt-4">
-    <a href="{% url "profile_view" %}">profile</a>
-    <h2 class="text-center fw-bold text-dark">User Dashboard</h2>
+<style>
+    /* General Styles */
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+    }
 
-    <!-- Display Roles & Departments -->
-    <div class="card p-3 shadow-sm mt-3">
-        <h4 class="fw-semibold">User Info</h4>
-        <p><strong>Role:</strong> {{ user.role.role_name }}</p>
-        <p><strong>Department:</strong> {{ user.department.dept_name }}</p>
+    .container-fluid {
+        width: 96%;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    /* Navbar */
+    .navbar {
+        border-radius: 12px;
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #343a40, #212529);
+    }
+
+    .navbar-brand {
+        font-size: 1.6rem;
+        font-weight: bold;
+    }
+
+    /* Card Styling */
+    .card {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        background: #ffffff;
+    }
+
+    .card h4 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #007bff;
+    }
+
+    .card-body {
+        padding: 24px;
+    }
+
+    hr {
+        border-top: 2px solid #dee2e6;
+        margin: 12px 0;
+    }
+
+    /* Table Styling */
+    .table-responsive {
+        width: 100%;
+    }
+
+    .table {
+        width: 100%;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .table th {
+        background: #007bff;
+        color: white;
+        font-weight: 600;
+        padding: 12px;
+        text-align: center;
+    }
+
+    .table td {
+        padding: 14px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    /* Task Priority Badges */
+    .badge {
+        font-size: 14px;
+        padding: 6px 12px;
+        border-radius: 10px;
+        font-weight: 500;
+    }
+
+    .badge.bg-danger {
+        background-color: #dc3545 !important;
+    }
+
+    .badge.bg-warning {
+        background-color: #ffc107 !important;
+        color: #212529 !important;
+    }
+
+    .badge.bg-success {
+        background-color: #28a745 !important;
+    }
+
+    /* Form Select */
+    .form-select {
+        width: 180px;
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        padding: 8px;
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        transform: scale(1.05);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .form-select {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="container-fluid mt-5">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark rounded shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">User Dashboard</a>
+        </div>
+    </nav>
+
+    <!-- User Info Card -->
+    <div class="card mt-4 shadow-sm">
+        <div class="card-body">
+            <h4>User Information</h4>
+            <hr>
+            <p class="mb-2"><strong>Role:</strong> <span class="text-secondary">{{ user.role.role_name }}</span></p>
+            <p><strong>Department:</strong> <span class="text-secondary">{{ user.department.dept_name }}</span></p>
+        </div>
     </div>
 
     <!-- Task List -->
-    <div class="card p-3 shadow-sm mt-4">
-        <h4 class="fw-semibold">Assigned Tasks</h4>
-        <table class="table table-striped mt-3">
-            <thead class="table-dark">
-                <tr>
-                    <th>Task Title</th>
-                    <th>Description</th>
-                    <th>Priority</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for assignment in assigned_tasks %}
-                <tr>
-                    <td>{{ assignment.task.task_title }}</td>
-                    <td>{{ assignment.task.task_description }}</td>
-                    <td>{{ assignment.task.task_priority }}</td>
-                    <td>
-                        <form method="POST" action="{% url 'update_task_status' assignment.assignment_id %}">
-                            {% csrf_token %}
-                            <select name="status" class="form-select">
-                                <option value="Pending" {% if assignment.status == "Pending" %}selected{% endif %}>Pending</option>
-                                <option value="In Progress" {% if assignment.status == "In Progress" %}selected{% endif %}>In Progress</option>
-                                <option value="Completed" {% if assignment.status == "Completed" %}selected{% endif %}>Completed</option>
-                            </select>
-                            <button type="submit" class="btn btn-sm btn-primary mt-2">Update</button>
-                        </form>
-                    </td>
-                    <td>
-                        {% comment %} <button type="submit" class="btn btn-sm btn-primary">Update</button> {% endcomment %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center text-muted">No tasks assigned.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="card mt-4 shadow-sm">
+        <div class="card-body">
+            <h4>Assigned Tasks</h4>
+            <hr>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                    <thead>
+                        <tr>
+                            <th>Task Title</th>
+                            <th>Description</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for assignment in assigned_tasks %}
+                        <tr>
+                            <td>{{ assignment.task.task_title }}</td>
+                            <td>{{ assignment.task.task_description }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if assignment.task.task_priority == 'High' %}bg-danger
+                                    {% elif assignment.task.task_priority == 'Medium' %}bg-warning text-dark
+                                    {% else %}bg-success
+                                    {% endif %}">
+                                    {{ assignment.task.task_priority }}
+                                </span>
+                            </td>
+                            <td>
+                                <form method="POST" action="{% url 'update_task_status' assignment.assignment_id %}">
+                                    {% csrf_token %}
+                                    <select name="status" class="form-select form-select-sm">
+                                        <option value="Pending" {% if assignment.status == "Pending" %}selected{% endif %}>Pending</option>
+                                        <option value="In Progress" {% if assignment.status == "In Progress" %}selected{% endif %}>In Progress</option>
+                                        <option value="Completed" {% if assignment.status == "Completed" %}selected{% endif %}>Completed</option>
+                                    </select>
+                            </td>
+                            <td>
+                                <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">No tasks assigned.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>

@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'employe',
     'task',
     'performance',
+    'leave_app',
 ]
 
 MIDDLEWARE = [

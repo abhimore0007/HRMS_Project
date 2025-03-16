@@ -24,4 +24,5 @@ urlpatterns = [
     path('Employee/', include('employe.urls')),
     path('task/', include('task.urls')),
     path('Performance/', include('performance.urls')),
+    path('leave_app/',include('leave_app.urls')),
 ]
